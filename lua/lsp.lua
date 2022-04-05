@@ -2,7 +2,7 @@ local caps = vim.lsp.protocol.make_client_capabilities()
 caps = require'cmp_nvim_lsp'.update_capabilities(caps)
 
 local lspc = require'lspconfig'
-local servers = { 'clojure_lsp' }
+local servers = { 'clojure_lsp', 'tsserver' }
 for _, lsp in pairs(servers) do
   lspc[lsp].setup({
     flags = {
@@ -42,4 +42,3 @@ cmp.setup {
     { name = 'path' }
   }
 }
-

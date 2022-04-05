@@ -21,7 +21,13 @@ opt.lazyredraw = true
 opt.colorcolumn = "80"
 opt.showmode = false
 
+opt.updatetime = 750
+
+opt.mouse = "a"
+
+opt.completeopt = "menu,menuone,noselect"
+
 cmd [[
-  syntax on
-  colorscheme gruvbox
+  let g:everforest_background = 'soft'
+  colorscheme everforest
 ]]

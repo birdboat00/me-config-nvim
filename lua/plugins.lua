@@ -6,36 +6,27 @@ require('packer').startup(function (use)
   use 'wbthomason/packer.nvim'
 
   -- colorscheme
-  use 'morhetz/gruvbox'
   use 'sainnhe/everforest'
 
-  --  file explorer
-  use {
-    'kyazdani42/nvim-tree.lua',
-    requires = {
-      'kyazdani42/nvim-web-devicons'
-    },
-    config = function()
-      require'nvim-tree'.setup {
-        git = {
-          enable = false
-        }
-      }
-      vim.cmd [[ nnoremap <C-t> :NvimTreeToggle<CR> ]]
-    end
-  }
+  -- icons
+  use 'kyazdani42/nvim-web-devicons'
 
   -- editorconfig plugin
   use 'editorconfig/editorconfig-vim'
 
   -- writer mode
-  use 'junegunn/goyo.vim'
-  
+  use 'Pocco81/TrueZen.nvim'
+
   -- statusline
   use {
-    'famiu/feline.nvim',
+    'nvim-lualine/lualine.nvim',
     config = function()
-      require('feline').setup({})
+      require'lualine'.setup({
+        options = {
+          theme = 'everforest',
+
+        }
+      })
     end
   }
   
@@ -52,6 +43,11 @@ require('packer').startup(function (use)
   use 'PaterJason/cmp-conjure'
   use 'onsails/lspkind-nvim'
 
+  -- dispatch and jack-in
+  use 'tpope/vim-dispatch'
+  use 'clojure-vim/vim-jack-in'
+  use 'radenling/vim-dispatch-neovim'
+
   -- list for showing diagnostics
   use {
     'folke/trouble.nvim',
@@ -67,13 +63,13 @@ require('packer').startup(function (use)
   }
 
   use 'sheerun/vim-polyglot'
-  use 'ap/vim-css-color'
+  use 'mattn/emmet-vim'
 
   use {
     'windwp/nvim-autopairs',
     config = function()
-      require('nvim-autopairs').setup{}
+      require('nvim-autopairs').setup()
     end
   }
-
 end)
+
