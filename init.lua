@@ -2,7 +2,7 @@
 -- Maintainer: birdboat00
 -- Website: https://birdboat00.github.io/
 -- GitHub: https://github.com/birdboat00
--- Last changed: 07 APR 2022
+-- Last changed: 16 APR 2022
 
 -- Auto install Packer
 local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
@@ -71,19 +71,19 @@ end)
 
 -- statusline
 local modes = {
-  ["n"] = "NORM",
-  ["no"] = "NORM",
-  ["v"] = "VIS",
-  ["V"] = "VIS LINE",
-  [" "] = "VIS BLOCK",
-  ["s"] = "SEL",
-  ["S"] = "SEL LINE",
-  [" "] = "SEL BLOCK",
-  ["i"] = "INS",
-  ["ic"] = "INS",
-  ["R"] = "RPL",
-  ["Rv"] = "VIS RPL",
-  ["c"] = "CMD",
+  ["n"] = "NORMAL",
+  ["no"] = "NORMAL",
+  ["v"] = "VISUAL",
+  ["V"] = "VISUAL LINE",
+  [" "] = "VISUAL BLOCK",
+  ["s"] = "SELECT",
+  ["S"] = "SELECT LINE",
+  [" "] = "SELECT BLOCK",
+  ["i"] = "INSERT",
+  ["ic"] = "INSERT",
+  ["R"] = "REPLACE",
+  ["Rv"] = "VISUAL REPLACE",
+  ["c"] = "COMMAND",
   ["cv"] = "VIM EX",
   ["ce"] = "EX",
   ["r"] = "PROMPT",
@@ -108,23 +108,19 @@ vim.cmd [[
   hi StatuslineExtra          guifg=#908caa
 ]]
 
-local function updatemodecols()
-  local cm = vim.api.nvim_get_mode().mode
-  local mc = "%#StatusLineAccent#"
-  if cm == "n" then
-    mc = "%#StatuslineAccent#"
-  elseif cm == "i" or cm == "ic" then
-    mc = "%#StatuslineInsertAccent#"
-  elseif cm == "v" or cm == "V" or cm == " " then
-    mc = "%#StatuslineVisualAccent#"
-  elseif cm == "R" then
-    mc = "%#StatuslineReplaceAccent#"
-  elseif cm == "c" then
-    mc = "%#StatuslineCmdLineAccent#"
-  elseif cm == "t" then
-    mc = "%#StatuslineTerminalAccent#"
-  end
-  return mc
+local function modecol()
+  local modecols = {
+    ["n"] = "%#StatuslineAccent#",
+    ["i"] = "%#StatuslineInsertAccent#",
+    ["ic"] = "%#StatuslineInsertAccent#",
+    ["v"] = "%#StatuslineVisualAccent#",
+    ["V"] = "%#StatuslineVisualAccent#",
+    [" "] = "%#StatuslineVisualAccent#",
+    ["R"] = "%#StatuslineReplaceAccent#",
+    ["c"] = "%#StatuslineCmdLineAccent#",
+    ["t"] = "%#StatuslineTerminalAccent#"
+  }
+  return modecols[vim.api.nvim_get_mode().mode]
 end
 
 local function filepath()
@@ -188,7 +184,7 @@ Statusline = {}
 Statusline.active = function()
   return table.concat {
     "%#Statusline#",
-    updatemodecols(),
+    modecol(),
     mode(),
     "%#Normal# ",
     filepath(),
@@ -200,7 +196,7 @@ Statusline.active = function()
     lineinfo(),
   }
 end
-function Statusline.inactive() return " %F" end
+Statusline.inactive = function() return " %F" end
 
 vim.cmd [[
   augroup Statusline
