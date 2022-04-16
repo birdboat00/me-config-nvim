@@ -5,9 +5,9 @@
 -- Last changed: 16 APR 2022
 
 -- Auto install Packer
-local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.execute('!git clone https://github.com/wbthomason/packer.nvim ' .. install_path)
+local pip = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
+if vim.fn.empty(vim.fn.glob(pip)) > 0 then
+  vim.fn.execute('!git clone https://github.com/wbthomason/packer.nvim '..pip)
 end
 
 -- basic settings
@@ -31,8 +31,6 @@ vo.completeopt = "menu,menuone,noselect"
 vo.wrap = false
 vo.cursorline = true
 vo.guicursor = "i:blinkon500-blinkoff500"
-vo.timeoutlen = 500
-
 
 -- Plugins and Packer
 vim.cmd [[
@@ -67,6 +65,8 @@ require('packer').startup(function(use)
   }
   use { 'nvim-telescope/telescope.nvim', requires = 'nvim-lua/plenary.nvim' }
   use 'mattn/emmet-vim'
+  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim',
+        config = function() require'neogit'.setup() end }
 end)
 
 -- statusline
@@ -133,8 +133,7 @@ end
 
 local function filename()
   local fname = vim.fn.expand "%:t"
-  if fname == "" then return "" end
-  return fname .. " "
+  return fname == "" and "" or fname .. " "
 end
 
 local function filetype()
@@ -142,19 +141,13 @@ local function filetype()
 end
 
 local function lineinfo()
-  if vim.bo.filetype == "alpha" then
-    return ""
-  end
-  return " %P %l:%c"
+  return vim.bo.filetype == "alpha" and "" or " %P %l:%c"
 end
 
 local function lsp()
   local count = {}
   local levels = {
-    errors = "Error",
-    warnings = "Warn",
-    info = "Info",
-    hints = "Hint"
+    errors = "Error", warnings = "Warn", info = "Info", hints = "Hint"
   }
   for k, level in pairs(levels) do
     count[k] = vim.tbl_count(vim.diagnostic.get(0, { severity = level }))
@@ -304,5 +297,19 @@ vim.cmd [[
   augroup FSharp
     autocmd!
     autocmd BufNewfile,BufRead *.fs,*.fsx,*.fsi set filetype=fsharp
+  augroup END
+]]
+
+-- Autocreate folder on save
+function mkdsave()
+  local dir = vim.fn.expand("<afile>:p:h")
+  if vim.fn.isdirectory(dir) == 0 then
+    vim.fn.mkdir(dir, 'p')
+  end
+end
+vim.cmd [[
+  augroup Mkdir
+    autocmd!
+    autocmd BufWritePre * lua mkdsave()
   augroup END
 ]]
