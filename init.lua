@@ -66,28 +66,24 @@ require('packer').startup(function(use)
     'folke/trouble.nvim',config=function()require'trouble'.setup()end
   }
   use { 'nvim-telescope/telescope.nvim', requires = 'nvim-lua/plenary.nvim' }
-  use 'sheerun/vim-polyglot'
   use 'mattn/emmet-vim'
-  use { 'windwp/nvim-autopairs',
-    config = function() require'nvim-autopairs'.setup {} end
-  }
 end)
 
 -- statusline
 local modes = {
-  ["n"] = "NORMAL",
-  ["no"] = "NORMAL",
-  ["v"] = "VISUAL",
-  ["V"] = "VISUAL LINE",
-  [" "] = "VISUAL BLOCK",
-  ["s"] = "SELECT",
-  ["S"] = "SELECT LINE",
-  [" "] = "SELECT BLOCK",
-  ["i"] = "INSERT",
-  ["ic"] = "INSERT",
-  ["R"] = "REPLACE",
-  ["Rv"] = "VISUAL REPLACE",
-  ["c"] = "COMMAND",
+  ["n"] = "NORM",
+  ["no"] = "NORM",
+  ["v"] = "VIS",
+  ["V"] = "VIS LINE",
+  [" "] = "VIS BLOCK",
+  ["s"] = "SEL",
+  ["S"] = "SEL LINE",
+  [" "] = "SEL BLOCK",
+  ["i"] = "INS",
+  ["ic"] = "INS",
+  ["R"] = "RPL",
+  ["Rv"] = "VIS RPL",
+  ["c"] = "CMD",
   ["cv"] = "VIM EX",
   ["ce"] = "EX",
   ["r"] = "PROMPT",
@@ -103,13 +99,13 @@ local function mode()
 end
 
 vim.cmd [[
-  hi StatusLineAccent guifg=bg guibg=fg
-  hi StatuslineInsertAccent guifg=bg guibg=red
-  hi StatuslineVisualAccent guifg=bg guibg=green
-  hi StatuslineReplaceAccent guifg=bg guibg=red
-  hi StatuslineCmdLineAccent guifg=bg guibg=yellow
-  hi StatuslineTerminalAccent guifg=bg guibg=yellow
-  hi StatuslineExtra guifg=fgfaded
+  hi StatusLineAccent         guifg=bg guibg=#ea9a97
+  hi StatuslineInsertAccent   guifg=bg guibg=#f6c177
+  hi StatuslineVisualAccent   guifg=bg guibg=#eb6f92
+  hi StatuslineReplaceAccent  guifg=bg guibg=#eb6f92
+  hi StatuslineCmdLineAccent  guifg=bg guibg=#3e8fb0
+  hi StatuslineTerminalAccent guifg=bg guibg=#3e8fb0
+  hi StatuslineExtra          guifg=#908caa
 ]]
 
 local function updatemodecols()
@@ -204,9 +200,7 @@ Statusline.active = function()
     lineinfo(),
   }
 end
-function Statusline.inactive()
-  return " %F"
-end
+function Statusline.inactive() return " %F" end
 
 vim.cmd [[
   augroup Statusline
@@ -221,7 +215,7 @@ vim.cmd [[
 local caps = vim.lsp.protocol.make_client_capabilities()
 caps = require'cmp_nvim_lsp'.update_capabilities(caps)
 local lspc = require'lspconfig'
-local servers = { 'clojure_lsp', 'hls', 'tsserver' }
+local servers = { 'clojure_lsp', 'hls', 'tsserver', 'fsautocomplete' }
 for _, lsp in pairs(servers) do
   lspc[lsp].setup({
     flags = {
@@ -279,6 +273,12 @@ function map_leader(combo, cmd)
   local opts = { noremap = true, silent = true } 
   vim.api.nvim_set_keymap('n', '<leader>'..combo, cmd, opts)
 end
+function inoremap(combo, cmd)
+  local opts = { noremap = true, silent = true }
+  vim.api.nvim_set_keymap('i', combo, cmd, opts)
+end
+-- NVIM
+map_leader('bbd', '<cmd>:bd<cr>')
 -- LSP
 map_leader('fmt', '<cmd>:lua vim.lsp.buf.formatting()<cr>')
 map_leader('lrn', '<cmd>:lua vim.lsp.buf.rename()<cr>')
@@ -290,5 +290,23 @@ map_leader('fb', '<cmd>Telescope buffers<cr>')
 map_leader('fc', '<cmd>Telescope commands<cr>')
 map_leader('fg', '<cmd>Telescope git_status<cr>')
 map_leader('tch', '<cmd>Telescope command_history<cr>')
-map_leader('tft', '<cmd>Telescope filetypes<cr>')
+map_leader('ft', '<cmd>Telescope filetypes<cr>')
 map_leader('tza', '<cmd>TZAtaraxis<cr>')
+-- autobrace
+inoremap('{', '{}<Esc>ha')
+inoremap('(', '()<Esc>ha')
+inoremap('[', '[]<Esc>ha')
+inoremap('"', '""<Esc>ha')
+inoremap("'", "''<Esc>ha")
+
+-- Settings for different filetypes
+vim.cmd [[
+  augroup Markdown
+    autocmd!
+    autocmd FileType markdown set wrap
+  augroup END
+  augroup FSharp
+    autocmd!
+    autocmd BufNewfile,BufRead *.fs,*.fsx,*.fsi set filetype=fsharp
+  augroup END
+]]
