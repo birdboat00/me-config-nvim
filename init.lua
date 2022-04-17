@@ -60,9 +60,6 @@ require('packer').startup(function(use)
   use 'L3MON4D3/LuaSnip'
   use 'saadparwaiz1/cmp_luasnip'
   use 'onsails/lspkind-nvim'
-  use {
-    'folke/trouble.nvim',config=function()require'trouble'.setup()end
-  }
   use { 'nvim-telescope/telescope.nvim', requires = 'nvim-lua/plenary.nvim' }
   use 'mattn/emmet-vim'
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim',
@@ -271,9 +268,8 @@ map_leader('bbd', '<cmd>:bd<cr>')
 -- LSP
 map_leader('fmt', '<cmd>:lua vim.lsp.buf.formatting()<cr>')
 map_leader('lrn', '<cmd>:lua vim.lsp.buf.rename()<cr>')
--- Trouble
-map_leader('xx', '<cmd>TroubleToggle<cr>')
 -- Telescope
+map_leader('xx', '<cmd>Telescope diagnostics<cr>')
 map_leader('ff', '<cmd>Telescope find_files<cr>')
 map_leader('fb', '<cmd>Telescope buffers<cr>')
 map_leader('fc', '<cmd>Telescope commands<cr>')
