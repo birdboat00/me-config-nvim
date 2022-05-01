@@ -33,13 +33,13 @@ vo.cursorline = true
 vo.guicursor = "i:blinkon500-blinkoff500"
 
 -- Plugins and Packer
-vim.cmd [[
-  augroup Packer
-    autocmd!
-    autocmd BufWritePost init.lua PackerCompile
-  augroup end
-  packadd packer.nvim
-]]
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "init.lua",
+  callback = function(args)
+    vim.cmd"PackerCompile"
+  end
+})
+vim.cmd"packadd packer.nvim"
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
   use 'kyazdani42/nvim-web-devicons'
@@ -50,6 +50,7 @@ require('packer').startup(function(use)
     end
   }
   use 'Olical/conjure'
+  use 'gpanders/nvim-parinfer'
   use 'neovim/nvim-lspconfig'
   use 'hrsh7th/nvim-cmp'
   use 'hrsh7th/cmp-buffer'
@@ -62,8 +63,7 @@ require('packer').startup(function(use)
   use 'onsails/lspkind-nvim'
   use { 'nvim-telescope/telescope.nvim', requires = 'nvim-lua/plenary.nvim' }
   use 'mattn/emmet-vim'
-  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim',
-        config = function() require'neogit'.setup() end }
+  use 'adelarsq/neofsharp.vim'
 end)
 
 -- statusline
@@ -176,7 +176,7 @@ Statusline.active = function()
     "%#Statusline#",
     modecol(),
     mode(),
-    "%#Normal# ",
+    "%#Normal#",
     filepath(),
     filename(),
     "%#Normal#",
@@ -188,14 +188,18 @@ Statusline.active = function()
 end
 Statusline.inactive = function() return " %F" end
 
-vim.cmd [[
-  augroup Statusline
-    autocmd!
-    autocmd WinEnter,BufEnter * setlocal statusline=%!v:lua.Statusline.active()
-    autocmd WinLeave,BufLeave * setlocal statusline=%!v:lua.Statusline.inactive()
-  augroup end
-]]
-
+vim.api.nvim_create_autocmd("WinEnter,BufEnter", {
+  pattern = "*",
+  callback = function(args)
+    vim.cmd"setlocal statusline=%!v:lua.Statusline.active()"
+  end
+})
+vim.api.nvim_create_autocmd("WinLeave,BufLeave", {
+  pattern = "*",
+  callback = function(args)
+    vim.cmd"setlocal statusline=%!v:lua.Statusline.inactive()"
+  end
+})
 
 -- LSP and completion engine
 local caps = vim.lsp.protocol.make_client_capabilities()
@@ -221,7 +225,7 @@ cmp.setup {
   },
   formatting = {
     format = lspkind.cmp_format({
-        mode = 'symbol',
+        mode = 'symbol_text',
         maxwidth = 50,
         menu = ({
           buffer = "[Buffer]",
@@ -255,13 +259,12 @@ cmp.setup {
 -- key bindings
 vim.g.mapleader = ","
 vim.g.maplocalleader = ","
-function map_leader(combo, cmd)
-  local opts = { noremap = true, silent = true } 
-  vim.api.nvim_set_keymap('n', '<leader>'..combo, cmd, opts)
-end
-function inoremap(combo, cmd)
+function remap(mode, combo, cmd)
   local opts = { noremap = true, silent = true }
-  vim.api.nvim_set_keymap('i', combo, cmd, opts)
+  vim.api.nvim_set_keymap(mode, combo, cmd, opts)
+end
+function map_leader(combo, cmd)
+  remap('n', '<leader>'..combo, cmd)
 end
 -- NVIM
 map_leader('bbd', '<cmd>:bd<cr>')
@@ -278,23 +281,25 @@ map_leader('tch', '<cmd>Telescope command_history<cr>')
 map_leader('ft', '<cmd>Telescope filetypes<cr>')
 map_leader('tza', '<cmd>TZAtaraxis<cr>')
 -- autobrace
-inoremap('{', '{}<Esc>ha')
-inoremap('(', '()<Esc>ha')
-inoremap('[', '[]<Esc>ha')
-inoremap('"', '""<Esc>ha')
-inoremap("'", "''<Esc>ha")
+remap('i', '{', '{}<Esc>ha')
+remap('i', '(', '()<Esc>ha')
+remap('i', '[', '[]<Esc>ha')
+remap('i', '"', '""<Esc>ha')
+remap('i', "'", "''<Esc>ha")
 
 -- Settings for different filetypes
-vim.cmd [[
-  augroup Markdown
-    autocmd!
-    autocmd FileType markdown set wrap
-  augroup END
-  augroup FSharp
-    autocmd!
-    autocmd BufNewfile,BufRead *.fs,*.fsx,*.fsi set filetype=fsharp
-  augroup END
-]]
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown", 
+  callback = function(args)
+    vim.cmd"set wrap"
+  end
+})
+vim.api.nvim_create_autocmd("BufNewfile,BufRead", {
+  pattern = "*.fs,*.fsx,*.fsi",
+  callback = function(args)
+    vim.cmd"set filetype=fsharp"
+  end
+})
 
 -- Autocreate folder on save
 function mkdsave()
@@ -303,9 +308,9 @@ function mkdsave()
     vim.fn.mkdir(dir, 'p')
   end
 end
-vim.cmd [[
-  augroup Mkdir
-    autocmd!
-    autocmd BufWritePre * lua mkdsave()
-  augroup END
-]]
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function(args)
+    mkdsave()
+  end
+})
